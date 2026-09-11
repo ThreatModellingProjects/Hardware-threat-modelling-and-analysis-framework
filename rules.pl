@@ -6,12 +6,7 @@ lifecycle_phases([design, proof_of_concept, fabrication, integration, production
 next_phase(P1, P2) :-
     lifecycle_phases(L), append(_, [P1, P2 | _], L).
 
-
-% Manufacturing predicates - ones that analysts declare, that rules do not derive them. 
 :- dynamic create_m/3, becomes_m/3, causes_m/3, targets_m/3, protects_m/4.
-
-
-% Manufacturing predicates that are both declared and derived. 
 :- multifile vulnerable_m/3, mitigated_m/3.
 :- table vulnerable_m/3, mitigated_m/3, susceptible_m/4.
 
@@ -39,14 +34,8 @@ vulnerable_m(A, V, P2) :-
 susceptible_m(A, V, T, P) :-
     vulnerable_m(A, V, P), \+ mitigated_m(A, V, P), targets_m(T, V, P), \+ protects_m(_, A, T, P).
 
-
-
-% Deployment predicates - ones that analysts declare, that rules do not derive.
 :- dynamic contain_d/2, depend_d/2, control_d/2, generate_d/2, receive_d/2, mitigated_d/2, causes_d/3, triggers_d/3, targets_d/2, effect_d/3,
            backup_d/3, protects_d/3, deployed_component/1.
-
-
-% Deployment predicates that are both declared and derived.
 :- multifile vulnerable_d/2.
 :- table vulnerable_d/2, susceptible_d/3, exposed_d/2.
 
@@ -126,14 +115,13 @@ exposed_d(A, E2) :-
 vulnerable_d(A, V) :-
     vulnerable_m(A, V, delivery), \+ mitigated_m(A, V, delivery), deployed_component(A).
 
-
 % Prints all derived predicates
 run :-
     nl, write('=== Part 1: derived V_m at delivery ==='), nl,
     forall(vulnerable_m(A, V, delivery), format("  V_m(~w, ~w, delivery)~n", [A, V])),
     nl, write('=== Part 1: derived S_m ==='), nl,
     forall(susceptible_m(A, V, T, P), format("  S_m(~w, ~w, ~w, ~w)~n", [A, V, T, P])),
-    nl, write('=== Part 2: derived V_d ==='), nl,
+    nl, write('=== Part 2 and 3: derived V_d ==='), nl,
     forall(vulnerable_d(A, V), format("  V_d(~w, ~w)~n", [A, V])),
     nl, write('=== Part 2: derived S_d ==='), nl,
     forall(susceptible_d(A, V, T), format("  S_d(~w, ~w, ~w)~n", [A, V, T])),
